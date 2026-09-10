@@ -21,7 +21,7 @@ wants both.
 ## Install
 
 ```
-/plugin marketplace add <your-github-user>/skills
+/plugin marketplace add RobertBoes/skills
 /plugin install readable-code@robertboes-skills
 /plugin install refactoring@robertboes-skills
 /plugin install ui-design@robertboes-skills
@@ -44,18 +44,32 @@ ln -s ~/Developer/skills/readable-code/skills/readable-code ~/.claude/skills/rea
 Or into a single project's `.claude/skills/`. Each skill lives at
 `<plugin>/skills/<name>`, so the same pattern works for all three.
 
-## Publishing your own copy
+## Making changes
 
-```bash
-cd ~/Developer/skills
-git init && git add . && git commit -m "Initial commit"
-gh repo create skills --public --source=. --remote=origin --push
+Edit a skill, then bump `version` in **both** manifests — the entry in
+`.claude-plugin/marketplace.json` and that plugin's
+`<plugin>/.claude-plugin/plugin.json`. Commit and push, then on any machine that has
+it installed:
+
+```
+/plugin marketplace update robertboes-skills
 ```
 
-To ship an update: edit the skill, bump `version` in both
-`.claude-plugin/marketplace.json` and `<plugin>/.claude-plugin/plugin.json`, commit
-and push, then `/plugin marketplace update robertboes-skills` on the consuming
-machine.
+Without the version bump the update won't be picked up.
+
+While iterating, skip the round trip entirely — add the working directory as a local
+marketplace (see Install above) and changes to `SKILL.md` take effect on the next
+session.
+
+### Forking
+
+```bash
+gh repo fork RobertBoes/skills --clone
+```
+
+Then rename the marketplace in `.claude-plugin/marketplace.json` — the `name` field
+is what `@robertboes-skills` refers to at install time, so leaving it unchanged will
+collide with this one.
 
 ## Layout
 
