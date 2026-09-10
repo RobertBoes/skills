@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace-manifest.json",
+  "name": "robertboes-skills",
+  "owner": {
+    "name": "Robert Boes"
+  },
+  "metadata": {
+    "description": "Claude Code skills for writing readable code, refactoring, and designing interfaces."
+  },
+  "plugins": [
+    {
+      "name": "readable-code",
+      "source": "./readable-code",
+      "description": "Write and review code for readability — naming, guard clauses, dead code, comments, null returns, symmetry.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": ["readability", "code-review", "clean-code", "naming"]
+    },
+    {
+      "name": "refactoring",
+      "source": "./refactoring",
+      "description": "Restructure code — defer abstraction, extract methods by level, replace primitives with objects, turn loops into pipelines.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": ["refactoring", "collections", "extraction", "duplication"]
+    },
+    {
+      "name": "ui-design",
+      "source": "./ui-design",
+      "description": "Visual design rules for app UI — design systems, hierarchy, spacing, type, color, depth, empty states.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": ["design", "ui", "css", "typography", "color"]
+    }
+  ]
+}

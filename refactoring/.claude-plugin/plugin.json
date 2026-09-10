@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "refactoring",
+  "description": "Restructure code — defer abstraction, extract methods by level, replace primitives with objects, turn loops into pipelines.",
+  "version": "1.0.0",
+  "author": { "name": "Robert Boes" },
+  "license": "MIT",
+  "keywords": ["refactoring", "collections", "extraction", "duplication", "php", "laravel"]
+}

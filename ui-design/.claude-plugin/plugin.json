@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ui-design",
+  "description": "Visual design rules for app UI — design systems, hierarchy, spacing, type, color, depth, empty states.",
+  "version": "1.0.0",
+  "author": { "name": "Robert Boes" },
+  "license": "MIT",
+  "keywords": ["design", "ui", "css", "tailwind", "typography", "color", "accessibility"]
+}
