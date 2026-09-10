@@ -12,7 +12,7 @@
       "name": "readable-code",
       "source": "./readable-code",
       "description": "Write and review code for readability \u2014 naming, guard clauses, dead code, comments, null returns, symmetry.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "productivity",
       "keywords": [
         "readability",
@@ -25,7 +25,7 @@
       "name": "refactoring",
       "source": "./refactoring",
       "description": "Restructure code \u2014 defer abstraction, extract methods by level, replace primitives with objects, turn loops into pipelines.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "productivity",
       "keywords": [
         "refactoring",

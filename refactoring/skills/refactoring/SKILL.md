@@ -15,6 +15,36 @@ Three questions cover most of it:
 2. **Where does this code belong?** → *Extract by level*
 3. **What shape should it take?** → *Objects over primitives*, *Loops to pipelines*
 
+## When to apply
+
+- **Writing new code** — the loop triggers below fire as you type, not only in review.
+  A loop you are writing right now is cheaper to shape than one you come back to.
+- **Finishing a change** — before calling anything done, re-read what you just wrote.
+  Accumulating loops and long methods are written while your attention is on the
+  problem; this is the checkpoint that catches them.
+- **Reviewing or cleaning up** — the usual case.
+
+**This applies to code you write**, including test helpers, fixtures, debugging
+scaffolding and one-off scripts. Test code is read more than application code and
+tends to be the last thing anyone revisits.
+
+**It is a standard, not a task.** Using it once in a session does not discharge it.
+
+### When you catch yourself thinking…
+
+| Thought | Reality |
+|---|---|
+| "It's just a test helper" | Test code is read more than app code. In scope. |
+| "I'm in the middle of debugging" | Minimality bounds *scope*, not *craft*. |
+| "It's only two nested loops" | Two nested loops is exactly the trigger. |
+| "The tests pass" | Passing tests verify behaviour, not shape. |
+| "I already used this skill this session" | It's a standard, not a task. |
+
+**Alongside a minimal-change discipline:** "one change at a time, no bundled
+refactoring" bounds what you may *touch* — it stops you restructuring unrelated code
+mid-fix. It does not license writing the new code badly. Shaping a loop you are
+writing anyway does not widen the diff; it is the same change, written well.
+
 ## Defer until necessary
 
 Duplication is cheaper than the wrong abstraction. A bad abstraction has to be

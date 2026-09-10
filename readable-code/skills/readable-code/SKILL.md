@@ -23,6 +23,11 @@ not laws. Reducing line count is never the goal; it is occasionally a side effec
 ## When to apply
 
 - **Writing new code** — the always-on rules, as you type.
+- **Finishing a change** — before calling anything done, re-read what you just wrote
+  against the always-on rules. Most violations are written while your attention is
+  on the problem, not the prose; this is the checkpoint that catches them. Do it
+  before you commit, before you report the change complete, and before you move to
+  the next task.
 - **Reviewing a diff or PR** — scan for the triggers; report violations as findings,
   naming the practice so the feedback teaches rather than nitpicks.
 - **Cleaning up** — work topic by topic: dead code → control flow → naming →
@@ -30,6 +35,41 @@ not laws. Reducing line count is never the goal; it is occasionally a side effec
 
 Boy-scout the code you are already editing. Do not rewrite untouched code nobody
 asked about.
+
+### These apply to code you write
+
+Not only to code you review. A fix inside a debugging session, a test helper, a
+throwaway script, a migration — all in scope. **Test code especially**: it is read
+more often than application code, it is where new contributors look first to
+understand behaviour, and nobody ever gets around to cleaning it up later.
+
+**This is a standard, not a task.** Invoking it once — to review a file, to run an
+audit — does not discharge it. It stays in force for every line written afterwards,
+including the lines you write implementing whatever the review found.
+
+### When you catch yourself thinking…
+
+| Thought | Reality |
+|---|---|
+| "It's just a test helper" | Test code is read more than app code. In scope. |
+| "I'm in the middle of debugging" | Minimality bounds *scope*, not *craft*. See below. |
+| "The formatter passed" | Formatting is not readability. A formatter cannot see a nested loop, a sentinel value, or a bad name. |
+| "Tests and static analysis are green" | Those verify behaviour and types. Neither asks whether the code reads well. |
+| "I already used this skill this session" | It's a standard, not a task. |
+| "This is throwaway code" | Throwaway code that works is the code that survives longest. |
+
+### Alongside a minimal-change or debugging discipline
+
+Guidance such as "one change at a time", "no while-I'm-here improvements", "no
+bundled refactoring" bounds **what you are allowed to touch**. It exists to stop you
+refactoring unrelated code in the middle of a fix, where it would obscure the change
+and complicate the revert.
+
+It says nothing about how the fix itself should read. The lines you add are new code,
+and the always-on rules apply to them in full. Writing a guard clause instead of a
+nested conditional *in the code you were already writing* is not a bundled refactor
+and does not widen the diff — it is the same change, written readably. Minimality
+governs scope; craft is not negotiable within it.
 
 ## Always-on rules
 

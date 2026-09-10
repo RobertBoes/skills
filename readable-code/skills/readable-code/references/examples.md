@@ -134,3 +134,104 @@ The rule of thumb: a comment describing **what** or **how** is a naming or
 extraction opportunity. A comment describing **why** has earned its place.
 
 ---
+
+---
+
+## 3. Test code is code
+
+Topics: control flow, naming, returns, plus loops-to-pipelines from the `refactoring`
+skill. This one is a real Pest helper, written mid-debugging by someone who had just
+finished applying these rules to somebody else's code.
+
+```php
+function badgedTeamNames(string $html): array
+{
+    preg_match_all(badgePattern(), $html, $badges, PREG_OFFSET_CAPTURE);
+    $teamNames = Team::query()->pluck('name')->all();
+    $badged = [];
+    foreach ($badges[0] as [$_, $badgePosition]) {
+        $closest = null;
+        $closestPosition = -1;
+        foreach ($teamNames as $name) {
+            $position = strpos($html, (string) $name);
+            if ($position !== false && $position < $badgePosition && $position > $closestPosition) {
+                $closest = $name;
+                $closestPosition = $position;
+            }
+        }
+        if ($closest !== null) { $badged[] = $closest; }
+    }
+    return $badged;
+}
+```
+
+It passed the formatter, the static analyser, and the test suite. Six rules fire
+anyway:
+
+| # | Rule | Where |
+|---|---|---|
+| 1 | Loop appending to an array declared just above → `map` | `$badged = []` and the outer `foreach` |
+| 2 | Inner loop is a filter plus a max-by → `filter` + `sortDesc` + `first` | the whole inner `foreach` |
+| 3 | Magic sentinel value | `$closestPosition = -1` |
+| 4 | Abbreviated name | `$_` in the destructure |
+| 5 | Nesting past one level | the `if` inside the inner `foreach` |
+| 6 | Invariant recomputed in a loop | `strpos($html, $name)` doesn't depend on the badge, but runs once per badge per team |
+
+**Hoist the invariant first.** `strpos($html, $name)` is the same on every pass —
+compute the positions once, and the `!== false` check disappears from the hot path
+at the same time:
+
+```php
+$namePositions = Team::query()->pluck('name')
+    ->mapWithKeys(fn (string $name) => [$name => strpos($html, $name)])
+    ->filter(fn (int|false $position) => $position !== false);
+```
+
+**Name what you're iterating.** `$badges[0]` under `PREG_OFFSET_CAPTURE` is a list of
+`[match, offset]` pairs, and only the offset is wanted — so pluck it and the `$_`
+goes away with the destructure.
+
+**The inner loop is "the latest position still before the badge."** Said that way it
+is a filter and a max-by, which extracts cleanly into a named function:
+
+```php
+function badgedTeamNames(string $html): array
+{
+    preg_match_all(badgePattern(), $html, $badges, PREG_OFFSET_CAPTURE);
+
+    $namePositions = Team::query()->pluck('name')
+        ->mapWithKeys(fn (string $name) => [$name => strpos($html, $name)])
+        ->filter(fn (int|false $position) => $position !== false);
+
+    return collect($badges[0])
+        ->pluck(1)
+        ->map(fn (int $badgePosition) => nameNearestBefore($namePositions, $badgePosition))
+        ->filter(fn (?string $name) => $name !== null)
+        ->values()
+        ->all();
+}
+
+function nameNearestBefore(Collection $namePositions, int $badgePosition): ?string
+{
+    return $namePositions
+        ->filter(fn (int $position) => $position < $badgePosition)
+        ->sortDesc()
+        ->keys()
+        ->first();
+}
+```
+
+The sentinel is gone because `sortDesc()->keys()->first()` expresses "the largest"
+directly, rather than simulating it with a running comparison seeded at an impossible
+value.
+
+**One honest tension.** `nameNearestBefore` returns `?string`, which the returns rule
+would normally push back on. Here the absence is real — a badge genuinely may have no
+preceding name — and the caller filters it out immediately, one line later. That is
+null being handled at the level where it arises instead of propagating, which is what
+the rule is actually protecting. Returning `''` to dodge the `?` would be worse.
+
+**The lesson is not the six rules.** It is that this was written an hour after
+applying the same rules to someone else's code, by someone who had mentally filed
+them under "the audit task" and filed this under "just a test helper." Both filings
+were wrong.
