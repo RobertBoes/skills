@@ -13,6 +13,7 @@ document you read once.
 | [`readable-code`](readable-code/skills/readable-code/SKILL.md) | Naming, guard clauses instead of nesting, removing dead code and explanatory comments, avoiding `null` returns, symmetry. Fires when writing or reviewing any code. |
 | [`refactoring`](refactoring/skills/refactoring/SKILL.md) | When duplication is ready to abstract, extracting long methods by level, objects over primitives, turning accumulating loops into pipelines. Fires on long methods, duplication, and loops that build up a result. |
 | [`ui-design`](ui-design/skills/ui-design/SKILL.md) | Reading a project's design tokens, visual hierarchy, spacing and type systems, color and shades, depth and shadows, empty states. Fires on UI markup and styles. |
+| [`api-design`](api-design/skills/api-design/SKILL.md) | Resources and endpoints, status codes, RFC 9457 error bodies, loading related data without n+1, pagination, versioning. Fires when adding or reviewing an HTTP endpoint. |
 
 They're split by topic, not by source: `readable-code` is about how code reads where
 you write it, `refactoring` is about changing its structure. A messy method usually
@@ -25,6 +26,7 @@ wants both.
 /plugin install readable-code@robertboes-skills
 /plugin install refactoring@robertboes-skills
 /plugin install ui-design@robertboes-skills
+/plugin install api-design@robertboes-skills
 ```
 
 For local development, point at the directory instead:
@@ -85,6 +87,7 @@ skills/                                <- the marketplace (this repo)
       references/
   refactoring/
   ui-design/
+  api-design/
 ```
 
 Each skill is its own plugin so they install independently. To add another, create a
@@ -102,8 +105,10 @@ actually fire during review. Advice phrased as a virtue does nothing.
 
 **No hardcoded project values.** `ui-design` reads the project's own theme tokens —
 spacing, type scale, palette, shadows — and only falls back to a starting scale when
-a project genuinely has none. Framework defaults move; relationships like "non-linear
-steps, ~25% minimum gaps, line-height inverse to font size" don't.
+a project genuinely has none. `api-design` does the same with an API's existing
+envelope, error shape, and pagination style, on the grounds that a consistently
+mediocre API beats an inconsistently good one. Framework defaults move; relationships
+like "non-linear steps, ~25% minimum gaps, line-height inverse to font size" don't.
 
 **Operations, not method names.** `refactoring` names the operation (keep matching,
 flatten one level, first match) and maps it across PHP/JS/Python/Ruby, with an
@@ -113,6 +118,10 @@ trusting the write-up.
 **Explicit limits.** Every skill says where to stop: don't rewrite untouched code,
 don't abstract code that appears once, don't build a pipeline past ~5 links, don't
 override a project's design system. Unbounded advice produces overreach.
+
+**Standards over summaries.** Where a public specification already covers something —
+JSON:API, RFC 9457, OpenAPI — the skill links to it and defers to it rather than
+paraphrasing a book's account of it. Paraphrases rot; specs get revised in place.
 
 **Dated notes are quarantined.** Anything version-specific lives in a reference file
 with a verification date, marked subordinate to the project's own config — see
@@ -132,10 +141,16 @@ are written from scratch, but the thinking behind them comes from:
   — Adam Wathan. The loops-to-pipelines material in `refactoring`.
 - **[Refactoring UI](https://refactoringui.com)** — Adam Wathan & Steve Schoger.
   Nearly all of `ui-design`.
+- **[Build APIs You Won't Hate](https://apisyouwonthate.com)** — Phil Sturgeon. The
+  design thinking in `api-design`, particularly the two-layer approach to errors and
+  the relationship-loading tradeoffs. Note the original is from 2013; where its advice
+  has been superseded by a standard, the skill follows the standard.
 
 Also drawn on throughout: Kent Beck's *Implementation Patterns*, Martin Fowler's
 *Refactoring*, Hunt & Thomas's *The Pragmatic Programmer*, and Rob Pike's notes on
-complexity.
+complexity. `api-design` follows [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html)
+and [JSON:API](https://jsonapi.org) as the authorities on error bodies and document
+structure respectively.
 
 Buy the books. They contain the reasoning, the worked examples, and — in Refactoring
 UI's case especially — before/after imagery that no text summary can replace. These

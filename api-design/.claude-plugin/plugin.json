@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "api-design",
+  "description": "Design and review HTTP APIs — resources and endpoints, status codes, RFC 9457 error bodies, relationship loading, pagination, versioning.",
+  "version": "1.0.0",
+  "author": { "name": "Robert Boes" },
+  "license": "MIT",
+  "keywords": ["api", "rest", "http", "json-api", "rfc9457", "api-design"]
+}
