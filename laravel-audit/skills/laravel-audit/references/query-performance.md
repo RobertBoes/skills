@@ -94,3 +94,9 @@ In rough order of return on effort:
 Measure before you report. "This looks slow" is not a finding; "this page issues 340
 queries, 300 of them identical" is. Laravel's query log, Telescope, Debugbar or an
 APM will give you the number, and the number is what gets it prioritised.
+
+## Related
+
+This file covers whether a query is *fast*. Where its constraints should *live* —
+inline, an attribute scope, a tappable scope, a query object, or a global scope
+registered at a boundary — is the `eloquent-queries` skill.

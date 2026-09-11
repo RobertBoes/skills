@@ -16,6 +16,7 @@ document you read once.
 | [`api-design`](api-design/skills/api-design/SKILL.md) | Resources and endpoints, status codes, RFC 9457 error bodies, loading related data without n+1, pagination, versioning. Fires when adding or reviewing an HTTP endpoint. |
 | [`queued-jobs`](queued-jobs/skills/queued-jobs/SKILL.md) | Idempotency, payload and serialization limits, retries and backoff, concurrency and rate limiting, deployment restarts. Fires when writing or reviewing a queued job. |
 | [`laravel-audit`](laravel-audit/skills/laravel-audit/SKILL.md) | Authorisation gaps, unvalidated input, raw queries, exposed package routes, fake facades, logic in Blade, N+1 queries, dead code. Fires when auditing an existing Laravel project. |
+| [`eloquent-queries`](eloquent-queries/skills/eloquent-queries/SKILL.md) | Where a query constraint belongs — inline, attribute scope, tappable scope, query object, global scope registered at a boundary, shared eager loads. Fires on a `where` written outside a model. |
 
 They're split by topic, not by source: `readable-code` is about how code reads where
 you write it, `refactoring` is about changing its structure. A messy method usually
@@ -31,6 +32,7 @@ wants both.
 /plugin install api-design@robertboes-skills
 /plugin install queued-jobs@robertboes-skills
 /plugin install laravel-audit@robertboes-skills
+/plugin install eloquent-queries@robertboes-skills
 ```
 
 For local development, point at the directory instead:
@@ -94,6 +96,7 @@ skills/                                <- the marketplace (this repo)
   api-design/
   queued-jobs/
   laravel-audit/
+  eloquent-queries/
 ```
 
 Each skill is its own plugin so they install independently. To add another, create a
@@ -133,6 +136,12 @@ bump that changes its syntax.
 **Standards over summaries.** Where a public specification already covers something —
 JSON:API, RFC 9457, OpenAPI — the skill links to it and defers to it rather than
 paraphrasing a book's account of it. Paraphrases rot; specs get revised in place.
+
+**Preferences are labelled as preferences.** `eloquent-queries` prefers tappable
+scopes, which are a community pattern the framework does not document. The skill says
+so in as many words, states the cost against the built-in alternative, and defers to
+whatever a project already uses — a skill that dresses up taste as consensus will
+eventually be believed.
 
 **Dated notes are quarantined.** Anything version-specific lives in a reference file
 with a verification date, marked subordinate to the project's own config — see
@@ -183,12 +192,30 @@ a book's account of it — paraphrases rot, specs get revised in place:
 - [Laravel's queue documentation](https://laravel.com/framework/docs/queues) for job
   mechanisms, in `queued-jobs`
 - Current framework defaults for scales, palettes and shadows, in `ui-design`
+- [Laravel's Eloquent documentation](https://laravel.com/docs/13.x/eloquent) for the
+  `#[Scope]` and `ScopedBy` attributes, in `eloquent-queries`
 
 Several rules exist *because* a source had been overtaken: `api-design` uses RFC 9457
 in place of the hand-rolled error codes its book predates, `queued-jobs` points at job
 middleware where its book hand-rolls the same thing with Redis primitives, and
 `ui-design` treats framework defaults as observations to verify rather than values to
 apply.
+
+### Articles
+
+One skill comes from blog posts rather than a book. `eloquent-queries` is built on the
+tappable-scope pattern as described by:
+
+- **[Unorthodox Eloquent](https://muhammedsari.me/unorthodox-eloquent)** — Muhammed
+  Sarı. The largest source: tappable scopes, global scopes registered at a boundary,
+  fluent query objects, and shared eager loads all come from here.
+- **[Elevate Your Laravel Eloquent Queries With Tappable Scopes](https://seankegel.com/elevate-your-laravel-eloquent-queries-with-tappable-scopes)**
+  — Sean Kegel.
+- **[Tappable Query Scopes in Laravel](https://www.juststeveking.com/articles/tappable-query-scopes-in-laravel/)**
+  — Steve McDougall.
+
+The pattern is theirs; the decision table for *when* to use it, the pinned
+implementation shape, and the limits are not.
 
 ### Original to this repo
 
@@ -211,7 +238,10 @@ Not from any book:
   actually executes; that grep output is a shortlist rather than a finding; and the
   job status lifecycle in `queued-jobs` — that a `try`/`catch` never runs for a killed
   worker, so terminal state belongs in `failed()` with a reconciliation sweep behind
-  it.
+  it; and that the usual case for tappable scopes ("Laravel's `scopeXxx` prefix is
+  ugly") no longer holds, because current Laravel declares local scopes with a
+  `#[Scope]` attribute — leaving reuse across models and name collisions as the
+  arguments that survive.
 
 ### From my own projects
 

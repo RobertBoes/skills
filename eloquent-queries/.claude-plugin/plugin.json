@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "eloquent-queries",
+  "description": "Decide where Eloquent query logic lives — tappable scopes, attribute scopes, query objects, scoped global scopes, shared eager loads.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Robert Boes"
+  },
+  "license": "MIT",
+  "keywords": [
+    "laravel",
+    "eloquent",
+    "scopes",
+    "query-builder",
+    "composition"
+  ]
+}

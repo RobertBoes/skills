@@ -80,7 +80,7 @@
       "name": "laravel-audit",
       "source": "./laravel-audit",
       "description": "Audit an existing Laravel codebase — authorisation gaps, unvalidated input, raw queries, exposed routes, fake facades, N+1 queries, dead code.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "productivity",
       "keywords": [
         "laravel",
@@ -88,6 +88,20 @@
         "technical-debt",
         "security",
         "performance"
+      ]
+    },
+    {
+      "name": "eloquent-queries",
+      "source": "./eloquent-queries",
+      "description": "Decide where Eloquent query logic lives — tappable scopes, attribute scopes, query objects, scoped global scopes, shared eager loads.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": [
+        "laravel",
+        "eloquent",
+        "scopes",
+        "query-builder",
+        "composition"
       ]
     }
   ]
