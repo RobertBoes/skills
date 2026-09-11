@@ -83,7 +83,7 @@ Fire on sight; no deliberation needed.
 | Empty `if` or `else` block | Delete it. An `if` requires no `else`. |
 | `break` after `return` in a switch case | Delete — unreachable. |
 | Code after an unconditional return | Delete — unreachable. |
-| Unused parameter, method, variable, import, or condition | Delete it. If you can't confirm it's unused, say so rather than leaving it silently. |
+| Unused parameter, method, variable, import, or condition | Delete it. If you can't confirm it's unused, say so rather than leaving it silently — and see the note below. |
 
 **Control flow**
 
@@ -105,6 +105,12 @@ Fire on sight; no deliberation needed.
 | Trigger | Action |
 |---|---|
 | A comment restating what the next line does | Delete it. If it held information — what a variable contains — fold that into the name. |
+
+**When you can't confirm code is dead**, don't guess in either direction. Check the
+version-control history for intent, remove it in a branch and exercise the surrounding
+features, and for anything still uncertain instrument it and wait a full business
+cycle — monthly and quarterly jobs are what a quick test misses. Then remove it in its
+own commit so the revert is trivial. (The `laravel-audit` skill covers this in full.)
 
 **Formatting** — don't hand-format. Run the project's formatter (Pint, PHP-CS-Fixer,
 Prettier, gofmt). If the project has none, say so once and move on. Time spent

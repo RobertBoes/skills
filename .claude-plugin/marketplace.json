@@ -12,7 +12,7 @@
       "name": "readable-code",
       "source": "./readable-code",
       "description": "Write and review code for readability — naming, guard clauses, dead code, comments, null returns, symmetry.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "productivity",
       "keywords": [
         "readability",
@@ -25,7 +25,7 @@
       "name": "refactoring",
       "source": "./refactoring",
       "description": "Restructure code — defer abstraction, extract methods by level, replace primitives with objects, turn loops into pipelines.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "productivity",
       "keywords": [
         "refactoring",
@@ -74,6 +74,20 @@
         "background-processing",
         "idempotency",
         "reliability"
+      ]
+    },
+    {
+      "name": "laravel-audit",
+      "source": "./laravel-audit",
+      "description": "Audit an existing Laravel codebase — authorisation gaps, unvalidated input, raw queries, exposed routes, fake facades, N+1 queries, dead code.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": [
+        "laravel",
+        "audit",
+        "technical-debt",
+        "security",
+        "performance"
       ]
     }
   ]

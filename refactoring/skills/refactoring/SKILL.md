@@ -58,6 +58,12 @@ Three is a heuristic, not a count. The actual rule is: **you will be smarter lat
 so defer the decision until it is necessary.** When you do abstract, the right shape
 is usually self-evident; if it still isn't obvious, you are early.
 
+The threshold is widely converged on — practitioners writing independently about
+Laravel refactoring land on the same "three or more places, or duplicated once but
+genuinely complex" bar, with the same warning that extracting too early adds
+complexity rather than removing it. Treat agreement from unrelated sources as
+evidence the heuristic is sound, not as a rule to apply mechanically.
+
 In practice this means:
 
 - Never propose an abstraction for code that appears once.
