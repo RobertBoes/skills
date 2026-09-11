@@ -141,10 +141,15 @@ with a verification date, marked subordinate to the project's own config — see
 If a rule ever conflicts with a project's conventions, the project wins; the skills
 say so explicitly.
 
-## Credits
+## Where this comes from
 
-These skills teach ideas that aren't mine. The rules, examples, and organization here
-are written from scratch, but the thinking behind them comes from:
+Three sources, in descending order of volume: books, primary documentation, and
+things learned by using these skills and getting them wrong.
+
+### Books
+
+Most of the substance. The rules, examples, and organization here are written from
+scratch, but the thinking behind them is theirs:
 
 - **[BaseCode Field Guide](https://basecodefieldguide.com)** — Jason McCreary. The
   backbone of `readable-code` and the extraction process in `refactoring`.
@@ -154,25 +159,78 @@ are written from scratch, but the thinking behind them comes from:
   Nearly all of `ui-design`.
 - **[Build APIs You Won't Hate](https://apisyouwonthate.com)** — Phil Sturgeon. The
   design thinking in `api-design`, particularly the two-layer approach to errors and
-  the relationship-loading tradeoffs. Note the original is from 2013; where its advice
-  has been superseded by a standard, the skill follows the standard.
+  the relationship-loading tradeoffs.
 - **[Battle Ready Laravel](https://battle-ready-laravel.com)** — Ash Allen. The audit
   checklist and dead-code procedure in `laravel-audit`. Its companion, *The Clean
   Coder's Guide to Laravel*, supplied the query-performance material.
 - **[Laravel Queues in Action](https://learn-laravel-queues.com)** — Mohamed Said
-  (second edition). The failure model and reliability rules in `queued-jobs`. The
-  book hand-rolls several patterns that the framework now ships as job middleware;
-  the skill teaches the decision and points at the current mechanism.
+  (second edition). The failure model and reliability rules in `queued-jobs`.
 
 Also drawn on throughout: Kent Beck's *Implementation Patterns*, Martin Fowler's
-*Refactoring*, Hunt & Thomas's *The Pragmatic Programmer*, and Rob Pike's notes on
-complexity. `api-design` follows [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html)
-and [JSON:API](https://jsonapi.org) as the authorities on error bodies and document
-structure respectively.
+*Refactoring*, Hunt & Thomas's *The Pragmatic Programmer*, and Rob Pike on complexity.
 
 Buy the books. They contain the reasoning, the worked examples, and — in Refactoring
 UI's case especially — before/after imagery that no text summary can replace. These
 skills are a working reference for an AI assistant, not a substitute for reading them.
+
+### Standards and documentation
+
+Where a living specification covers the ground, the skill follows the spec rather than
+a book's account of it — paraphrases rot, specs get revised in place:
+
+- [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html) for error bodies and
+  [JSON:API](https://jsonapi.org) for document structure, in `api-design`
+- [Laravel's queue documentation](https://laravel.com/framework/docs/queues) for job
+  mechanisms, in `queued-jobs`
+- Current framework defaults for scales, palettes and shadows, in `ui-design`
+
+Several rules exist *because* a source had been overtaken: `api-design` uses RFC 9457
+in place of the hand-rolled error codes its book predates, `queued-jobs` points at job
+middleware where its book hand-rolls the same thing with Redis primitives, and
+`ui-design` treats framework defaults as observations to verify rather than values to
+apply.
+
+### Original to this repo
+
+Not from any book:
+
+- **The invocation design** — the finishing-a-change trigger, the anti-rationalization
+  tables, "it's a standard, not a task", and the reconciliation with minimal-change
+  disciplines. These came from watching these skills fail to fire while writing code,
+  and fixing the triggering rather than the rules.
+- **Conventions-first.** Every skill that could impose a house style reads the
+  project's own first — design tokens, API shape, queue setup, existing job
+  conventions — and says explicitly that the project wins on conflict. That is a
+  decision made here, and it is the main thing keeping these from going stale.
+- **Explicit limits.** Where to stop is stated everywhere: chain length, closure size,
+  when a plain loop beats a pipeline, when not to introduce an object, not rewriting
+  untouched code. Books rarely bound their own advice; unbounded advice produces
+  overreach.
+- **Corrections and additions**, including: the 403-versus-404 security tradeoff its
+  book treats purely as sloppiness; that `preventLazyLoading` only fires on code that
+  actually executes; that grep output is a shortlist rather than a finding; and the
+  job status lifecycle in `queued-jobs` — that a `try`/`catch` never runs for a killed
+  worker, so terminal state belongs in `failed()` with a reconciliation sweep behind
+  it.
+
+### From my own projects
+
+Some rules come from codebases rather than books. The `queued-jobs` status lifecycle
+started as a project-level convention skill and was generalized here after the
+underlying failure mode became clear.
+
+Project-level skills and general skills are different things and should stay that way.
+A project skill encodes *this* codebase's conventions — its enums, its loggers, its
+base classes — and rightly outranks anything general. What belongs here is only the
+part that would still be true in someone else's codebase.
+
+Two rules for anything promoted out of a private project:
+
+1. **Generalize or leave it.** If a rule only makes sense with a specific class, table
+   or service name in it, it is a project skill, not a general one.
+2. **Carry nothing proprietary.** No internal service names, schema details,
+   credentials, customer names, or security specifics — not in prose, and not in the
+   examples. Rewrite examples in a neutral domain before they land here.
 
 ## License
 
