@@ -5,7 +5,7 @@
     "name": "Robert Boes"
   },
   "metadata": {
-    "description": "Claude Code skills for writing readable code, refactoring, designing interfaces, and building APIs."
+    "description": "Claude Code skills for writing readable code, refactoring, designing interfaces, building APIs, and securing web apps."
   },
   "plugins": [
     {
@@ -102,6 +102,20 @@
         "scopes",
         "query-builder",
         "composition"
+      ]
+    },
+    {
+      "name": "web-security",
+      "source": "./web-security",
+      "description": "Secure a web app at the edge — CSP and security headers, subresource integrity, cookies, CORS, the proxy trust boundary, and bot protection.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": [
+        "security",
+        "csp",
+        "headers",
+        "cors",
+        "cookies"
       ]
     }
   ]

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "web-security",
+  "description": "Secure a web app at the edge — CSP and security headers, subresource integrity, cookies, CORS, the proxy trust boundary, and bot protection.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Robert Boes"
+  },
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "csp",
+    "headers",
+    "cors",
+    "cookies"
+  ]
+}
