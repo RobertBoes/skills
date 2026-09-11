@@ -76,6 +76,26 @@ from `Str::uuid()` inside `handle()`, which generates a fresh one per attempt an
 defeats the entire mechanism. Most payment and logistics APIs support this; check
 before hand-rolling a check-then-act.
 
+## Unique jobs are not idempotency
+
+`ShouldBeUnique` prevents a **second instance being dispatched** while one is
+queued. It does not prevent the queued instance from **running twice** — a crash
+after success still produces a retry, and the uniqueness lock is long released by
+then.
+
+So it solves a different problem: accidental duplicate *dispatch* (a double-clicked
+button, an event firing twice). Worth having, but it is not a substitute for any of
+the three guards above. Use both.
+
+Two traps:
+
+- **The default lock key is the job class name**, which dedupes across unrelated
+  subjects — one queued refund would block refunds for every other customer.
+  Implement `uniqueId()` and key it on the resource.
+- **The lock expiry interacts with backoff.** If the lock expires in 10 seconds but
+  a failed job retries immediately, the retry finds the lock still held and does
+  nothing — consuming attempts without doing work. Backoff must outlast the lock.
+
 ## When the provider offers nothing
 
 Some APIs have no idempotency key and no way to look up by your reference. Options,

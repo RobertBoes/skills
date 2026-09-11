@@ -100,6 +100,41 @@ Two copies of the same job can run at the same moment, on different machines. If
 that would corrupt state, say so explicitly with a lock or overlap middleware —
 don't assume the queue serializes anything. It doesn't.
 
+### Aware of shared worker state
+
+A worker boots **one application instance** and reuses it for every job it processes.
+Static properties, container bindings, config values and the app locale all persist
+between unrelated jobs on that worker.
+
+So a job that changes state leaks it into whatever the worker picks up next:
+
+```php
+public function handle(): void
+{
+    app()->setLocale($this->locale);   // every later job on this worker
+    // ...                             // now runs in $this->locale
+}
+```
+
+Three rules:
+
+1. **Restore what you change**, at the end of `handle()`.
+2. **Restore it in `failed()` too** — an exception skips the rest of `handle()`, so
+   the cleanup never runs and the leak persists.
+3. If several jobs do this, **reset defaults in job middleware** rather than
+   duplicating cleanup, so a job that forgets still starts from a known state.
+
+**State needed before the job is deserialized** — the classic case being a
+multi-tenant database connection, which must be configured before a serialized model
+can be resolved — cannot be set inside `handle()` or middleware, because both run too
+late. Set it from the `JobProcessing` event, which fires after the worker picks the
+job up but before the instance is built. The job's properties aren't available yet,
+so stash what you need in the raw payload at dispatch time (`Queue::createPayloadUsing`)
+and read it from the event.
+
+This is a silent-corruption bug class: it never reproduces in a single-job test, and
+it surfaces as an unrelated job behaving strangely.
+
 ## Problem → mechanism
 
 Name the problem first, then reach for the mechanism. In Laravel these are job
@@ -113,9 +148,9 @@ middleware, returned from a `middleware()` method.
 | Remote service is down and every job is burning a worker | `ThrottlesExceptions` — stop attempting for a while (circuit breaker) |
 | Some exceptions are permanent and shouldn't retry | `FailOnException` for those classes |
 | This job should be skipped under some condition | `Skip::when()` / `Skip::unless()` |
-| Only one of these should be queued at a time | `ShouldBeUnique`, or `ShouldBeUniqueUntilProcessing` if a new one should be queueable once work starts |
+| Only one of these should be queued at a time | `ShouldBeUnique` — set `uniqueId()`, or the lock key defaults to the class name and dedupes across unrelated subjects. Use `ShouldBeUniqueUntilProcessing` if a new one should be queueable once work starts |
 | Dispatched repeatedly; only the last matters | `#[DebounceFor]` (Laravel 13.6+) |
-| Many jobs, one completion callback | `Bus::batch()` with `then` / `catch` / `finally` |
+| Many jobs, one completion callback | `Bus::batch()` with `then` / `catch` / `finally` — dispatch in chunks if there are many (see below) |
 | Steps that must run in order, stopping on failure | `Bus::chain()` |
 | Payload contains sensitive data | `ShouldBeEncrypted` |
 
@@ -141,6 +176,36 @@ more effective than any middleware.
   accidental double execution.
 - **Implement `failed()`** for anything a human needs to know about. A job that ends
   up in `failed_jobs` unnoticed is silent data loss.
+- **If you hold a lock, backoff must outlast the lock's expiry.** A job that fails
+  while holding a 10-second lock and retries immediately finds its own lock still in
+  place and does nothing useful — burning attempts until it gives up.
+
+**"Job has been attempted too many times or run too long"** has four causes, and
+they are worth distinguishing before changing `tries`:
+
+1. The job timed out on the last attempt.
+2. The worker or server crashed mid-attempt.
+3. The job was released back to the queue (often by a limiter) during the attempt.
+4. `retry_after` is shorter than the job's timeout, so a second instance started
+   while the first was still running.
+
+Only the first is "the job is too slow". The fourth is a configuration bug that also
+causes duplicate execution, and it's the one to rule out first.
+
+## Large batches
+
+Dispatching a batch writes a row to `job_batches` and holds a lock on it while the
+jobs are being written to the queue. With a large batch that lock is held for a long
+time, and every worker finishing a job in that batch queues up behind it. Two
+consequences, both nasty:
+
+- A worker waiting on the lock can hit its own timeout and be killed — so a job that
+  **already completed its work** is retried.
+- On MySQL/InnoDB the update fails outright after 50 seconds: `Lock wait timeout
+  exceeded`.
+
+**Dispatch large batches in chunks**, so the lock is released between them. The same
+applies when adding jobs to an existing batch.
 
 ## Deployment
 

@@ -153,10 +153,10 @@ are written from scratch, but the thinking behind them comes from:
   design thinking in `api-design`, particularly the two-layer approach to errors and
   the relationship-loading tradeoffs. Note the original is from 2013; where its advice
   has been superseded by a standard, the skill follows the standard.
-- **[Laravel Queues in Action](https://learn-laravel-queues.com)** — Mohamed Said.
-  The failure model and reliability rules in `queued-jobs`. The book hand-rolls
-  several patterns that the framework now ships as job middleware; the skill teaches
-  the decision and points at the current mechanism.
+- **[Laravel Queues in Action](https://learn-laravel-queues.com)** — Mohamed Said
+  (second edition). The failure model and reliability rules in `queued-jobs`. The
+  book hand-rolls several patterns that the framework now ships as job middleware;
+  the skill teaches the decision and points at the current mechanism.
 
 Also drawn on throughout: Kent Beck's *Implementation Patterns*, Martin Fowler's
 *Refactoring*, Hunt & Thomas's *The Pragmatic Programmer*, and Rob Pike's notes on

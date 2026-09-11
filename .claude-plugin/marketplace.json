@@ -66,7 +66,7 @@
       "name": "queued-jobs",
       "source": "./queued-jobs",
       "description": "Design reliable background jobs — idempotency, payload limits, retries and backoff, concurrency and rate limiting, deployment restarts.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "productivity",
       "keywords": [
         "queues",
