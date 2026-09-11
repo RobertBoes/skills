@@ -14,6 +14,7 @@ document you read once.
 | [`refactoring`](refactoring/skills/refactoring/SKILL.md) | When duplication is ready to abstract, extracting long methods by level, objects over primitives, turning accumulating loops into pipelines. Fires on long methods, duplication, and loops that build up a result. |
 | [`ui-design`](ui-design/skills/ui-design/SKILL.md) | Reading a project's design tokens, visual hierarchy, spacing and type systems, color and shades, depth and shadows, empty states. Fires on UI markup and styles. |
 | [`api-design`](api-design/skills/api-design/SKILL.md) | Resources and endpoints, status codes, RFC 9457 error bodies, loading related data without n+1, pagination, versioning. Fires when adding or reviewing an HTTP endpoint. |
+| [`queued-jobs`](queued-jobs/skills/queued-jobs/SKILL.md) | Idempotency, payload and serialization limits, retries and backoff, concurrency and rate limiting, deployment restarts. Fires when writing or reviewing a queued job. |
 
 They're split by topic, not by source: `readable-code` is about how code reads where
 you write it, `refactoring` is about changing its structure. A messy method usually
@@ -27,6 +28,7 @@ wants both.
 /plugin install refactoring@robertboes-skills
 /plugin install ui-design@robertboes-skills
 /plugin install api-design@robertboes-skills
+/plugin install queued-jobs@robertboes-skills
 ```
 
 For local development, point at the directory instead:
@@ -88,6 +90,7 @@ skills/                                <- the marketplace (this repo)
   refactoring/
   ui-design/
   api-design/
+  queued-jobs/
 ```
 
 Each skill is its own plugin so they install independently. To add another, create a
@@ -119,6 +122,11 @@ trusting the write-up.
 don't abstract code that appears once, don't build a pipeline past ~5 links, don't
 override a project's design system. Unbounded advice produces overreach.
 
+**Correctness skills state their failure model.** `queued-jobs` opens with why a job
+can run more than once — including after it has already succeeded — because every
+rule in it follows from that, and a rule whose reason you know survives a version
+bump that changes its syntax.
+
 **Standards over summaries.** Where a public specification already covers something —
 JSON:API, RFC 9457, OpenAPI — the skill links to it and defers to it rather than
 paraphrasing a book's account of it. Paraphrases rot; specs get revised in place.
@@ -145,6 +153,10 @@ are written from scratch, but the thinking behind them comes from:
   design thinking in `api-design`, particularly the two-layer approach to errors and
   the relationship-loading tradeoffs. Note the original is from 2013; where its advice
   has been superseded by a standard, the skill follows the standard.
+- **[Laravel Queues in Action](https://learn-laravel-queues.com)** — Mohamed Said.
+  The failure model and reliability rules in `queued-jobs`. The book hand-rolls
+  several patterns that the framework now ships as job middleware; the skill teaches
+  the decision and points at the current mechanism.
 
 Also drawn on throughout: Kent Beck's *Implementation Patterns*, Martin Fowler's
 *Refactoring*, Hunt & Thomas's *The Pragmatic Programmer*, and Rob Pike's notes on
