@@ -19,25 +19,69 @@ Nested and conditional relations work the same way — `with('author.company')`,
 
 ### Let the framework find them
 
-Hunting N+1s by reading code does not scale. Make them loud instead:
+Hunting N+1s by reading code does not scale. Make them loud instead.
+
+The usual advice is `Model::preventLazyLoading(! app()->isProduction())`. Don't do
+that — it gives up the signal exactly where the cost is real. Keep the check on
+everywhere and decide what a violation *does*:
 
 ```php
 // AppServiceProvider::boot()
-Model::preventLazyLoading(! app()->isProduction());
+use Illuminate\Database\LazyLoadingViolationException;
+
+Model::preventLazyLoading();
+
+Model::handleLazyLoadingViolationUsing(
+    function (Model $model, string $relation, LazyLoadingViolationException $violation): void {
+        if (app()->isProduction()) {
+            report($violation);   // Sentry, or whatever the app reports to
+
+            return;
+        }
+
+        throw $violation;
+    }
+);
 ```
 
-Any lazy load now raises `LazyLoadingViolationException` in local, CI and staging,
-while production keeps working. Enable it, run the test suite, and the violations
-come to you.
+Failing tests in development, reported exceptions in production, and the page still
+renders. The suite never covers every page, and the paths it misses are the ones running
+against real data volumes: a relation lazy-loaded over ten fixture rows is invisible, the
+same code over ten thousand is the problem you were looking for. Those are precisely the
+ones the usual advice silences.
 
-Two caveats worth knowing before you trust it:
+Note the namespace: `Illuminate\Database\LazyLoadingViolationException`, not
+`Illuminate\Database\Eloquent\`. The framework builds the exception before calling
+the handler and passes it as the third argument, so take it rather than constructing a
+second one.
+
+Registering a handler **replaces** the default behaviour entirely, including its guard
+— by default a violation on a model that doesn't exist yet, or was just created, is
+ignored. A handler that throws unconditionally will fire on those too. Re-add the guard
+if that noise is not useful:
+
+```php
+if (! $model->exists || $model->wasRecentlyCreated) {
+    return;
+}
+```
+
+Three caveats worth knowing before you trust it:
 
 - **It only fires on code that executes.** An N+1 inside a loop that never runs —
   because the fixture collection is empty — is not detected. Empty-collection tests
   give false confidence here.
-- **Turning it on in production is a judgment call.** It converts a slow page into a
-  500. Defensible on a small team with good coverage; risky otherwise. The
-  `! app()->isProduction()` form is the safe default.
+- **It does not catch every lazy load.** `Builder::hydrate` arms the check only on
+  models hydrated from a query that returned **more than one row** (`count($items) > 1`)
+  — a lazy load on a single model is not an N+1, so it is deliberately allowed. A test
+  written with a one-row fixture therefore passes regardless of what the handler does,
+  or whether one is registered at all. **Use two rows.**
+- **Some of the inventory may be blocked.** The violations are the inventory you could
+  not have produced by reading code — but not all of it is actionable. In one real
+  case, 10 of 26 violations could not be eager-loaded at all until a column type was
+  migrated, which took three sequenced deploys. Finding a blocked violation is itself a
+  result: record it with what unblocks it, and don't let a partial fix read as a failed
+  one.
 
 Where it can't reach, a query-log assertion in a test is the fallback: assert that
 rendering a page issues no more than N queries. Blunt, but it catches regressions the
