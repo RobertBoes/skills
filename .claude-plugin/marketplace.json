@@ -131,6 +131,20 @@
         "actions",
         "validation"
       ]
+    },
+    {
+      "name": "laravel-packages",
+      "source": "./laravel-packages",
+      "description": "Build and maintain a Laravel package — service provider wiring, optional peer dependencies, errors strangers can act on, Octane-safe state, driver extension points, version matrices and upgrade guides.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": [
+        "laravel",
+        "package",
+        "service-provider",
+        "testbench",
+        "open-source"
+      ]
     }
   ]
 }
