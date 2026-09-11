@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "request-handling",
+  "description": "Supplements Laravel Boost's best-practices skill — invokable vs grouped controllers, signals a resource route has drifted, middleware as an authorisation location, job/action split.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Robert Boes"
+  },
+  "license": "MIT",
+  "keywords": [
+    "laravel",
+    "controllers",
+    "routing",
+    "actions",
+    "validation"
+  ]
+}

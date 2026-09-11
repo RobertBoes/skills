@@ -117,6 +117,20 @@
         "cors",
         "cookies"
       ]
+    },
+    {
+      "name": "request-handling",
+      "source": "./request-handling",
+      "description": "Supplements Laravel Boost's best-practices skill — invokable vs grouped controllers, signals a resource route has drifted, middleware as an authorisation location, job/action split.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": [
+        "laravel",
+        "controllers",
+        "routing",
+        "actions",
+        "validation"
+      ]
     }
   ]
 }

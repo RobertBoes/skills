@@ -1,6 +1,7 @@
 # skills
 
-Claude Code skills for writing readable code, refactoring, and designing interfaces.
+Claude Code skills for writing readable code, refactoring, designing interfaces, and
+building Laravel apps that hold up.
 
 Each is a set of trigger→action rules meant to fire while you work — during code
 review, while writing a component, while cleaning up a long method — rather than a
@@ -17,10 +18,14 @@ document you read once.
 | [`queued-jobs`](queued-jobs/skills/queued-jobs/SKILL.md) | Idempotency, payload and serialization limits, retries and backoff, concurrency and rate limiting, deployment restarts. Fires when writing or reviewing a queued job. |
 | [`laravel-audit`](laravel-audit/skills/laravel-audit/SKILL.md) | Authorisation gaps, unvalidated input, raw queries, exposed package routes, fake facades, logic in Blade, N+1 queries, dead code. Fires when auditing an existing Laravel project. |
 | [`eloquent-queries`](eloquent-queries/skills/eloquent-queries/SKILL.md) | Where a query constraint belongs — inline, attribute scope, tappable scope, query object, global scope registered at a boundary, shared eager loads. Fires on a `where` written outside a model. |
+| [`web-security`](web-security/skills/web-security/SKILL.md) | CSP and security headers, subresource integrity, cookie flags, CORS, the reverse-proxy trust boundary, bot protection. Fires when adding a third-party script, a public form, or a new domain. |
+| [`request-handling`](request-handling/skills/request-handling/SKILL.md) | The HTTP-layer decisions Laravel Boost's own guidelines leave open — invokable vs grouped controllers, when a resource route has drifted, middleware as an authorisation location, the job/action seam. Fires when adding a route or a controller method. |
 
 They're split by topic, not by source: `readable-code` is about how code reads where
 you write it, `refactoring` is about changing its structure. A messy method usually
-wants both.
+wants both. `web-security` and `laravel-audit` split the same way — the first is
+authoring guidance for the edge of an app, the second audits application code it already
+has.
 
 ## Install
 
@@ -33,6 +38,8 @@ wants both.
 /plugin install queued-jobs@robertboes-skills
 /plugin install laravel-audit@robertboes-skills
 /plugin install eloquent-queries@robertboes-skills
+/plugin install web-security@robertboes-skills
+/plugin install request-handling@robertboes-skills
 ```
 
 For local development, point at the directory instead:
@@ -97,6 +104,8 @@ skills/                                <- the marketplace (this repo)
   queued-jobs/
   laravel-audit/
   eloquent-queries/
+  web-security/
+  request-handling/
 ```
 
 Each skill is its own plugin so they install independently. To add another, create a
@@ -134,8 +143,16 @@ rule in it follows from that, and a rule whose reason you know survives a versio
 bump that changes its syntax.
 
 **Standards over summaries.** Where a public specification already covers something —
-JSON:API, RFC 9457, OpenAPI — the skill links to it and defers to it rather than
-paraphrasing a book's account of it. Paraphrases rot; specs get revised in place.
+JSON:API, RFC 9457, OpenAPI, the CSP spec and MDN's directive reference — the skill
+links to it and defers to it rather than paraphrasing a book's account of it.
+Paraphrases rot; specs get revised in place.
+
+**Defer to whatever is already maintained.** Before adding a skill, check what the
+framework's own tooling ships — Laravel Boost installs a `laravel-best-practices` skill
+into `vendor/`, versioned with the framework. `request-handling` was cut by two thirds
+once that was read, and now points at those rules rather than competing with them. Two
+sources of advice on one question is worse than one, and the one that updates itself
+should win.
 
 **Preferences are labelled as preferences.** `eloquent-queries` prefers tappable
 scopes, which are a community pattern the framework does not document. The skill says
@@ -233,7 +250,10 @@ Not from any book:
   when a plain loop beats a pipeline, when not to introduce an object, not rewriting
   untouched code. Books rarely bound their own advice; unbounded advice produces
   overreach.
-- **Corrections and additions**, including: the 403-versus-404 security tradeoff its
+- **Corrections and additions**, including: that closure routes have not broken
+  `route:cache` since at least Laravel 10, despite the rule still being repeated
+  everywhere; that `middlewareFor()` removes "these actions need different middleware"
+  as a reason to abandon a resource route; the 403-versus-404 security tradeoff its
   book treats purely as sloppiness; that `preventLazyLoading` only fires on code that
   actually executes; that grep output is a shortlist rather than a finding; and the
   job status lifecycle in `queued-jobs` — that a `try`/`catch` never runs for a killed
@@ -247,7 +267,17 @@ Not from any book:
 
 Some rules come from codebases rather than books. The `queued-jobs` status lifecycle
 started as a project-level convention skill and was generalized here after the
-underlying failure mode became clear.
+underlying failure mode became clear. `request-handling` came out of comparing the HTTP layer
+of three of my own apps written years apart — what stayed constant is in the skill, what
+changed between them is deliberately not. It is also deliberately small: most of what I
+first wrote turned out to be covered by Laravel Boost's own `laravel-best-practices`
+rules, which ship with the framework and are versioned with it, so the skill was cut back
+to the decisions those leave open and now points at them instead of restating them. `web-security` was reconstructed from the
+headers, CSP, cookie and proxy setup of two of my own apps — the deny-by-default posture, the
+scoped dev relaxations, gating HSTS on production *and* an actually-secure request, and
+the live-validation interaction that makes honeypots misfire all came from code that was
+already running. The domains, hosts and analytics vendors did not: every example here is
+`example.com`.
 
 Project-level skills and general skills are different things and should stay that way.
 A project skill encodes *this* codebase's conventions — its enums, its loggers, its
