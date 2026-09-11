@@ -31,29 +31,32 @@ use Illuminate\Database\LazyLoadingViolationException;
 
 Model::preventLazyLoading();
 
-Model::handleLazyLoadingViolationUsing(
-    function (Model $model, string $relation, LazyLoadingViolationException $violation): void {
-        if (app()->isProduction()) {
-            report($violation);   // Sentry, or whatever the app reports to
+Model::handleLazyLoadingViolationUsing(function (Model $model, string $relation): void {
+    $violation = new LazyLoadingViolationException($model, $relation);
 
-            return;
-        }
+    if (app()->isProduction()) {
+        report($violation);   // Sentry, or whatever the app reports to
 
-        throw $violation;
+        return;
     }
-);
+
+    throw $violation;
+});
 ```
 
 Failing tests in development, reported exceptions in production, and the page still
-renders. The suite never covers every page, and the paths it misses are the ones running
+renders — a handler that returns instead of throwing lets the lazy load go ahead, which
+is the point. The suite never covers every page, and the paths it misses are the ones running
 against real data volumes: a relation lazy-loaded over ten fixture rows is invisible, the
 same code over ten thousand is the problem you were looking for. Those are precisely the
 ones the usual advice silences.
 
 Note the namespace: `Illuminate\Database\LazyLoadingViolationException`, not
-`Illuminate\Database\Eloquent\`. The framework builds the exception before calling
-the handler and passes it as the third argument, so take it rather than constructing a
-second one.
+`Illuminate\Database\Eloquent\`. The handler receives exactly two arguments —
+the model and the relation name — so build the exception yourself. (A third argument
+carrying a pre-built exception exists on the framework's development branch; a closure
+that declares it will fail with an `ArgumentCountError` on released versions. Verify
+against the installed framework before using it.)
 
 Registering a handler **replaces** the default behaviour entirely, including its guard
 — by default a violation on a model that doesn't exist yet, or was just created, is

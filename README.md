@@ -19,6 +19,7 @@ document you read once.
 | [`laravel-audit`](laravel-audit/skills/laravel-audit/SKILL.md) | Authorisation gaps, unvalidated input, raw queries, exposed package routes, fake facades, logic in Blade, N+1 queries, dead code. Fires when auditing an existing Laravel project. |
 | [`eloquent-queries`](eloquent-queries/skills/eloquent-queries/SKILL.md) | Where a query constraint belongs — inline, attribute scope, tappable scope, query object, global scope registered at a boundary, shared eager loads. Fires on a `where` written outside a model. |
 | [`web-security`](web-security/skills/web-security/SKILL.md) | CSP and security headers, subresource integrity, cookie flags, CORS, the reverse-proxy trust boundary, bot protection. Fires when adding a third-party script, a public form, or a new domain. |
+| [`laravel-packages`](laravel-packages/skills/laravel-packages/SKILL.md) | Service provider wiring, optional peer dependencies detected testably, errors a stranger can act on, Octane-safe state, driver extension points, version matrices, upgrade guides. Fires when writing package code. |
 | [`request-handling`](request-handling/skills/request-handling/SKILL.md) | The HTTP-layer decisions Laravel Boost's own guidelines leave open — invokable vs grouped controllers, when a resource route has drifted, middleware as an authorisation location, the job/action seam. Fires when adding a route or a controller method. |
 
 They're split by topic, not by source: `readable-code` is about how code reads where
@@ -40,6 +41,7 @@ has.
 /plugin install eloquent-queries@robertboes-skills
 /plugin install web-security@robertboes-skills
 /plugin install request-handling@robertboes-skills
+/plugin install laravel-packages@robertboes-skills
 ```
 
 For local development, point at the directory instead:
@@ -106,11 +108,50 @@ skills/                                <- the marketplace (this repo)
   eloquent-queries/
   web-security/
   request-handling/
+  laravel-packages/
+  tests/                               <- claim checks, not a plugin
 ```
 
 Each skill is its own plugin so they install independently. To add another, create a
 sibling directory with a `.claude-plugin/plugin.json` and a `skills/<name>/SKILL.md`,
 then add an entry to `marketplace.json`.
+
+## Verifying the claims
+
+The skills state version-specific facts — that an interface exists, that a method
+ignores its callback's return value, that a config key is still called what it was
+called. Those rot silently, and a stale claim in a skill is worse than no skill: it is
+confidently wrong, and it fires automatically.
+
+`tests/` holds a small PHPUnit suite that asserts them against a real Laravel install:
+
+```bash
+cd tests
+composer install
+vendor/bin/phpunit
+```
+
+It runs on every push and PR, and weekly on a schedule so drift surfaces without anyone
+touching the repo. **The lock file is deliberately not committed** — the point is to
+test against the newest releases, not a pinned set.
+
+**When a skill states a checkable fact, add an assertion.** Each test names the skill
+file and quotes the claim, and each failure message says which claim broke:
+
+```php
+$this->assertTrue(
+    is_subclass_of($class, QueryContract::class),
+    "{$class} no longer satisfies the query builder contract, which the pinned scope shape depends on",
+);
+```
+
+This earned itself on the first run: it caught that `handleLazyLoadingViolationUsing()`
+passes the handler **two** arguments on released Laravel, not three, so the snippet
+`laravel-audit` shipped would have died with an `ArgumentCountError`. The three-argument
+form exists only on the framework's development branch, which is what had been read.
+
+The idea is lifted from `robertboes/inertia-breadcrumbs`, which tests the Boost skill it
+ships against its own API for the same reason — see the `laravel-packages` skill.
 
 ## Design notes
 
@@ -146,6 +187,10 @@ bump that changes its syntax.
 JSON:API, RFC 9457, OpenAPI, the CSP spec and MDN's directive reference — the skill
 links to it and defers to it rather than paraphrasing a book's account of it.
 Paraphrases rot; specs get revised in place.
+
+**Claims are tested, not just dated.** A verification date says when someone looked; a
+test says whether it is still true. Anything checkable gets an assertion in `tests/` —
+see above.
 
 **Defer to whatever is already maintained.** Before adding a skill, check what the
 framework's own tooling ships — Laravel Boost installs a `laravel-best-practices` skill
@@ -267,7 +312,10 @@ Not from any book:
 
 Some rules come from codebases rather than books. The `queued-jobs` status lifecycle
 started as a project-level convention skill and was generalized here after the
-underlying failure mode became clear. `request-handling` came out of comparing the HTTP layer
+underlying failure mode became clear. `laravel-packages` came out of `robertboes/inertia-breadcrumbs`: the optional-peer
+checker that exists purely to be fakeable, exceptions that name the missing package and
+the command to install it, clearing per-request state on an Octane event, and the
+matrix that tests both ends of every constraint. `request-handling` came out of comparing the HTTP layer
 of three of my own apps written years apart — what stayed constant is in the skill, what
 changed between them is deliberately not. It is also deliberately small: most of what I
 first wrote turned out to be covered by Laravel Boost's own `laravel-best-practices`
