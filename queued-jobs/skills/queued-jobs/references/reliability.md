@@ -155,6 +155,12 @@ The failure mode never appears in a normal test run, so provoke it:
   afterwards, simulating a crash mid-job.
 - For concurrency, assert the lock or unique constraint exists rather than trying to
   race it in a test.
+- If the job tracks status, test **both** terminal paths — force an exception and
+  assert the row ends `Failed`, not stuck in `Processing`. Then check the same holds
+  when the job is killed rather than throwing, which is what `failed()` is for and
+  what a `try`/`catch` alone will miss.
+- Fake external services (`Http::fake()`, `Storage::fake()`, `Bus::fake()`), so the
+  failure path can be provoked on demand rather than waited for.
 
 These are cheap tests and they document the intent, which matters when someone later
 "simplifies" the guard away.

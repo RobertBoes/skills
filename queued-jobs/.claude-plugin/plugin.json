@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "queued-jobs",
   "description": "Design reliable background jobs — idempotency, payload limits, retries and backoff, concurrency and rate limiting, deployment restarts.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": {
     "name": "Robert Boes"
   },

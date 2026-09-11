@@ -41,7 +41,10 @@ Before adding or changing a job, find out what already exists:
 3. **Worker configuration** — supervisor config, Horizon config, or the deploy
    script. What are `--tries`, `--timeout`, `--max-time` set to globally?
 4. **Existing job conventions** — do jobs in this codebase use attributes or
-   properties, middleware or hand-rolled limiting, batches or chains?
+   properties, middleware or hand-rolled limiting, batches or chains? Check for a
+   project-level skill or convention doc (`.ai/skills/`, `.claude/skills/`,
+   `CLAUDE.md`) describing the house job shape — status enums, audit logging,
+   required base classes. Where one exists it outranks anything here.
 5. **Failure handling** — is there a `failed()` method convention, a `failed_jobs`
    table being monitored, alerting?
 
@@ -99,6 +102,50 @@ Details and worked examples in `references/payloads.md`.
 Two copies of the same job can run at the same moment, on different machines. If
 that would corrupt state, say so explicitly with a lock or overlap middleware —
 don't assume the queue serializes anything. It doesn't.
+
+### Honest about its own status
+
+Jobs that record their progress on a model — `Pending` → `Processing` →
+`Completed` / `Failed` — are common and useful. The naive shape has a hole in it:
+
+```php
+public function handle(): void
+{
+    $this->request->update(['status' => Status::Processing]);
+
+    try {
+        // work...
+        $this->request->update(['status' => Status::Completed]);
+    } catch (\Throwable $e) {
+        $this->request->update(['status' => Status::Failed]);
+
+        throw $e;   // re-throw, or the queue thinks this succeeded
+    }
+}
+```
+
+The `try`/`catch` handles *exceptions*. It does not run when the worker is killed —
+timeout, OOM, SIGKILL, machine loss. Those are the failure modes queues exist to
+survive, and in every one of them the row is left saying `Processing` forever. Nobody
+is watching a row that claims to be working.
+
+Three rules:
+
+1. **Set the terminal state in `failed()`, not only in `catch`.** The framework calls
+   it after the final attempt however the job died, which is the only hook that covers
+   a killed worker.
+2. **Re-throw after marking failed.** Swallowing the exception to "handle" it tells
+   the queue the job succeeded — no retry, no `failed_jobs` row, silent loss.
+3. **Reconcile stragglers anyway.** Even `failed()` isn't guaranteed. Anything whose
+   state matters needs a scheduled sweep that finds rows stuck in `Processing` past a
+   plausible duration and resolves them. Treat in-flight status as a hint, never as
+   truth.
+
+Status writes are also side effects, so they inherit the idempotency question: a job
+that succeeded and is retried will write `Completed` twice. Harmless for a status
+column; **not** harmless for anything that hangs off it, like an audit log entry, a
+notification, or a "completed" webhook. Guard those the same way you'd guard a
+payment.
 
 ### Aware of shared worker state
 
@@ -164,6 +211,11 @@ more effective than any middleware.
 
 - **Set attempts deliberately.** One attempt is a sane local default and a bad
   production one. Note that in Laravel 13 `--tries=0` means retry *indefinitely*.
+- **Irreversible work that can't be made idempotent gets one attempt.** Deleting data,
+  sending an irrevocable message, a payment with no idempotency key — if you cannot
+  guarantee a second run is safe, a retry is a liability rather than resilience. Fail
+  once, loudly, and let a human decide. Retryable work (generating a file, calling an
+  API that tolerates duplicates) gets several attempts with increasing backoff.
 - **Back off between retries**, and prefer an increasing series over a fixed delay —
   an immediate retry against a service that just failed usually fails again.
 - **`maxExceptions` is not `tries`.** A job released back to the queue by a limiter
@@ -230,7 +282,9 @@ properties with defaults rather than changing signatures, or drain the queue fir
 4. What happens if two copies run simultaneously?
 5. Are attempts, backoff and timeout set, and is the timeout under `retry_after`?
 6. Does it need a dedicated queue to avoid starving other work?
-7. Is there a `failed()` path, and does anyone find out?
+7. If it tracks status, does a killed worker still reach a terminal state — or does
+   the row sit in `Processing` forever?
+8. Is there a `failed()` path, and does anyone find out?
 
 ## Version note
 
