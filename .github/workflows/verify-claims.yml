@@ -21,7 +21,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.3', '8.4']
+        # Both ends of what the dependencies actually support: laravel/framework,
+        # testbench and phpunit all require ^8.3, and 8.5 is current.
+        php: ['8.3', '8.5']
 
     name: PHP ${{ matrix.php }}
 
