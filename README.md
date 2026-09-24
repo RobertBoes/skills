@@ -52,14 +52,15 @@ For local development, point at the directory instead:
 
 ### Without the plugin system
 
-Symlink a skill directly:
+Install with the [skills CLI](https://www.skills.sh/docs/cli).
 
 ```
-ln -s ~/Developer/skills/readable-code/skills/readable-code ~/.claude/skills/readable-code
-```
+# All skills
+npx skills add https://github.com/RobertBoes/skills
 
-Or into a single project's `.claude/skills/`. Each skill lives at
-`<plugin>/skills/<name>`, so the same pattern works for all three.
+# Specific skill
+npx skills add https://github.com/RobertBoes/skills --skill readable-code
+```
 
 ## Making changes
 
