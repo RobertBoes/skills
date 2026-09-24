@@ -52,11 +52,12 @@ same code over ten thousand is the problem you were looking for. Those are preci
 ones the usual advice silences.
 
 Note the namespace: `Illuminate\Database\LazyLoadingViolationException`, not
-`Illuminate\Database\Eloquent\`. The handler receives exactly two arguments —
-the model and the relation name — so build the exception yourself. (A third argument
-carrying a pre-built exception exists on the framework's development branch; a closure
-that declares it will fail with an `ArgumentCountError` on released versions. Verify
-against the installed framework before using it.)
+`Illuminate\Database\Eloquent\`. Since Laravel 13.32 the handler receives three
+arguments — the model, the relation name and a pre-built `LazyLoadingViolationException`.
+Earlier versions pass only the first two, and a closure that declares the third will fail
+with an `ArgumentCountError` there. The snippet above declares two and builds the
+exception itself, which works on both; on 13.32+ you can take the third argument instead.
+Check the installed framework version before relying on it.
 
 Registering a handler **replaces** the default behaviour entirely, including its guard
 — by default a violation on a model that doesn't exist yet, or was just created, is

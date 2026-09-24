@@ -30,11 +30,10 @@ class LaravelAuditClaimsTest extends TestCase
     }
 
     #[Test]
-    public function the_handler_receives_exactly_the_model_and_the_relation_name(): void
+    public function the_handler_receives_the_model_the_relation_name_and_the_exception(): void
     {
-        // "The handler receives exactly two arguments — the model and the relation
-        // name — so build the exception yourself." A closure declaring a third
-        // parameter fails with an ArgumentCountError on released versions.
+        // "Since Laravel 13.32 the handler receives three arguments — the model, the
+        // relation name and a pre-built LazyLoadingViolationException."
         $received = [];
 
         Model::preventLazyLoading();
@@ -46,12 +45,31 @@ class LaravelAuditClaimsTest extends TestCase
         $widget->parts;
 
         $this->assertCount(
-            2,
+            3,
             $received,
-            'The handler signature changed; query-performance.md documents two arguments and builds the exception itself',
+            'The handler signature changed; query-performance.md documents three arguments since Laravel 13.32',
         );
         $this->assertInstanceOf(Widget::class, $received[0]);
         $this->assertSame('parts', $received[1]);
+        $this->assertInstanceOf(LazyLoadingViolationException::class, $received[2]);
+    }
+
+    #[Test]
+    public function the_documented_two_parameter_handler_still_runs(): void
+    {
+        // "The snippet above declares two and builds the exception itself, which
+        // works on both." Extra arguments to a closure are dropped, not an error.
+        $violation = null;
+
+        Model::preventLazyLoading();
+        Model::handleLazyLoadingViolationUsing(function (Model $model, string $relation) use (&$violation): void {
+            $violation = new LazyLoadingViolationException($model, $relation);
+        });
+
+        $widget = Widget::hydrate([['id' => 1], ['id' => 2]])->first();
+        $widget->parts;
+
+        $this->assertInstanceOf(LazyLoadingViolationException::class, $violation);
     }
 
     #[Test]

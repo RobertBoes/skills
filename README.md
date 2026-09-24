@@ -147,9 +147,11 @@ $this->assertTrue(
 ```
 
 This earned itself on the first run: it caught that `handleLazyLoadingViolationUsing()`
-passes the handler **two** arguments on released Laravel, not three, so the snippet
+passed the handler **two** arguments on released Laravel, not three, so the snippet
 `laravel-audit` shipped would have died with an `ArgumentCountError`. The three-argument
-form exists only on the framework's development branch, which is what had been read.
+form existed only on the framework's development branch, which is what had been read.
+It caught the reverse too: when Laravel 13.32 shipped the third argument, the scheduled
+run failed and the note was updated.
 
 The idea is lifted from `robertboes/inertia-breadcrumbs`, which tests the Boost skill it
 ships against its own API for the same reason — see the `laravel-packages` skill.

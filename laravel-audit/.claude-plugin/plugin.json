@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "laravel-audit",
   "description": "Audit an existing Laravel codebase — authorisation gaps, unvalidated input, raw queries, exposed routes, fake facades, N+1 queries, dead code.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": {
     "name": "Robert Boes"
   },
