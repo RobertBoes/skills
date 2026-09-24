@@ -8,6 +8,11 @@ description: Practical visual design rules for building app UI — type scale, s
 Practical visual design for **application UI in a codebase**. (For a published
 Claude Artifact, prefer the `artifact-design` skill; for charts, `dataviz`.)
 
+This skill is about consistency with the project's own design system. For areas it
+doesn't cover, such as motion, interaction states, UX copy or responsive behavior,
+consider the [impeccable](https://impeccable.style) skills if they're installed.
+Where impeccable pushes for a distinctive look, the project's system still wins.
+
 ## Start here
 
 Most "this looks bad and I don't know why" comes from three things, in order:
@@ -109,6 +114,11 @@ before styling it.
   scannable data), style them as secondary. Emphasize the *label* over the value only
   when users scan for the label — spec tables, where someone looks for "Depth", not
   "7.6mm".
+- **Make state unmistakable, and show it the same way everywhere.** An active card,
+  a selected row, or the current nav item should be obvious at a glance, and every
+  "selected" in the app should use the same treatment. The treatment itself comes
+  from the project's design; this skill only asks that there is one and that it's
+  used consistently.
 
 ## Layout and spacing
 
@@ -130,9 +140,9 @@ before styling it.
 
 ## Color
 
-- **Use HSL**, not hex — hue, saturation, lightness map to what your eye perceives,
-  so related colors look related in code. (Not HSB: 100% brightness in HSB is only
-  white at 0% saturation.)
+- **Author color in the project's color space.** When there's none yet, use OKLCH:
+  equal lightness values look equally light, so shade steps come out even. Avoid raw
+  hex for anything you'll need to derive shades from.
 - **You need far more colors than five.** A real palette is 8–10 greys, 1–2 primaries
   with 5–10 shades each, plus accent colors for semantic states (red destructive,
   yellow warning, green positive) with their own shades. A complex UI can need ten
@@ -143,11 +153,11 @@ before styling it.
   (for tinted backgrounds), then bisect the gaps until you have enough. Bisecting is
   what keeps the steps perceptually even — don't interpolate mathematically and
   don't add shades ad hoc later.
-- **Increase saturation as lightness moves away from 50%**, or light and dark shades
-  look washed out.
-- **Rotate hue to change brightness** when saturation is maxed: toward 60°/180°/300°
-  to lighten, toward 0°/120°/240° to darken. Stay within 20–30° or it reads as a
-  different color.
+- **In an HSL palette, increase saturation as lightness moves away from 50%**, or
+  light and dark shades look washed out. OKLCH handles most of this for you.
+- **In an HSL palette, rotate hue to change brightness** when saturation is maxed:
+  toward 60°/180°/300° to lighten, toward 0°/120°/240° to darken. Stay within 20–30°
+  or it reads as a different color.
 - **Greys shouldn't be 0% saturation.** Tint blue for a cool UI, yellow/orange for a
   warm one. Keep the tint consistent across the whole scale.
 - **Never grey-out text on a colored background**, and don't just drop opacity —
@@ -180,7 +190,8 @@ applies:
 - **Light comes from above.** Raised elements: lighter top edge, shadow below. Inset
   elements: shadow at the top. This one rule is the whole effect.
 - **Shadows mean elevation, and elevation means attention.** Small/tight for buttons,
-  medium for dropdowns, large for modals. Define **five** and stop. Choose by asking
+  medium for dropdowns, large for modals. Use a **small fixed set** (about five, or
+  the framework's named steps if it has them) and stop. Choose by asking
   where the element sits on the z-axis, not by how the shadow looks.
 - **Two-part shadows**: a large soft one with vertical offset (cast shadow) plus a
   tight dark one with little offset (ambient occlusion). The tight one should be
@@ -202,8 +213,6 @@ Only after hierarchy, spacing, and type are right:
 
 - **Supercharge the defaults** — icons instead of bullets, oversized colored quote
   marks, custom checkboxes/radios in a brand color, styled link underlines.
-- **Accent borders** — a colored bar across a card top, beside an alert, under a
-  heading, across the layout top. Requires no design talent and reads as "designed".
 - **Decorate backgrounds** — a different background color per section, a subtle
   gradient (hues within ~30°), a low-contrast repeating pattern, or a simple
   geometric shape. Keep contrast low so content stays readable.

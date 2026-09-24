@@ -38,7 +38,7 @@
       "name": "ui-design",
       "source": "./ui-design",
       "description": "Visual design rules for app UI — design systems, hierarchy, spacing, type, color, depth, empty states.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "productivity",
       "keywords": [
         "design",

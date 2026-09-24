@@ -80,6 +80,6 @@ after launch.
 
 ## Nav
 
-- Active item stands out by de-emphasizing the rest, plus an accent border on the
-  active one.
+- Active item stands out by de-emphasizing the rest, plus the same active-state
+  treatment the rest of the app uses for "selected".
 - Nav is chrome, not content — it should be quieter than the page it frames.
